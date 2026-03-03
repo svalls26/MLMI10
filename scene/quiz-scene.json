@@ -1,0 +1,122 @@
+{
+  "scene": {
+    "id": "quiz-scene",
+    "title": "AI Flashcard Quiz",
+    "layout": "one-on-one",
+    "autostart": true
+  },
+  "agents": [
+    {
+      "id": "quiz-master",
+      "name": "Quinn",
+      "role": "Quiz Master",
+      "avatar": "assets/default-avatar.glb",
+      "voice": "en-US-Neural2-F",
+      "persona": "You are Quinn, an enthusiastic and encouraging AI quiz master. Evaluate student answers fairly — accept correct meaning even if not word-for-word exact. For correct answers: celebrate and share a fun related fact. For wrong answers: gently correct and give a memory tip. For partial answers: acknowledge what is right and nudge toward the full answer. Keep all responses to 2-4 sentences. Always stay warm and motivating. Start every evaluation reply with exactly [CORRECT], [PARTIAL], or [WRONG].",
+      "turn_taking": "reactive"
+    }
+  ],
+  "human_participant": {
+    "id": "student",
+    "name": "Student",
+    "role": "learner"
+  },
+  "snippets": [
+    {
+      "id": "intro",
+      "type": "scripted",
+      "trigger": "session_start",
+      "agent": "quiz-master",
+      "message": "Hey! I'm Quinn, your quiz master! Which deck would you like? Geography, Science, History, or Programming — or say 'custom' to bring your own cards!"
+    },
+    {
+      "id": "deck-selected",
+      "type": "scripted",
+      "trigger": "deck_loaded",
+      "agent": "quiz-master",
+      "message": "Great choice! {{deck_name}} it is — {{card_count}} cards loaded. I'll ask each question, just type your answer. Let's go!"
+    },
+    {
+      "id": "ask-question",
+      "type": "scripted",
+      "trigger": "next_card",
+      "agent": "quiz-master",
+      "message": "Card {{current}} of {{total}}: {{question}}"
+    },
+    {
+      "id": "evaluate-answer",
+      "type": "generative",
+      "trigger": "user_answered",
+      "agent": "quiz-master",
+      "prompt_template": "The student was asked: '{{question}}'. The correct answer is: '{{correct_answer}}'. The student answered: '{{user_answer}}'. Evaluate their answer. Start with [CORRECT], [PARTIAL], or [WRONG], then give 2-3 warm sentences.",
+      "on_complete": "advance_card"
+    },
+    {
+      "id": "hint-request",
+      "type": "generative",
+      "trigger": "hint_keyword",
+      "agent": "quiz-master",
+      "prompt_template": "Give a playful hint for '{{question}}' WITHOUT revealing the full answer '{{correct_answer}}'. Keep it to 1-2 sentences."
+    },
+    {
+      "id": "repeat-question",
+      "type": "scripted",
+      "trigger": "repeat_keyword",
+      "agent": "quiz-master",
+      "message": "Sure! Here it is again: {{question}}"
+    },
+    {
+      "id": "skip-card",
+      "type": "scripted",
+      "trigger": "skip_keyword",
+      "agent": "quiz-master",
+      "message": "No worries! The answer was: {{correct_answer}}. Moving on!",
+      "on_complete": "advance_card"
+    },
+    {
+      "id": "session-end",
+      "type": "generative",
+      "trigger": "all_cards_done",
+      "agent": "quiz-master",
+      "prompt_template": "The student just finished a flashcard quiz. They scored {{correct}} out of {{total}} ({{percentage}}%). Give them an enthusiastic, personalized closing message. Be encouraging regardless of the result."
+    }
+  ],
+  "turn_taking_rules": {
+    "mode": "reactive",
+    "keyword_triggers": {
+      "hint":   "hint-request",
+      "skip":   "skip-card",
+      "repeat": "repeat-question"
+    }
+  },
+  "decks": {
+    "Geography": [
+      { "q": "What is the capital of Japan?",                     "a": "Tokyo" },
+      { "q": "Which is the longest river in the world?",          "a": "The Nile River" },
+      { "q": "What country has the most natural lakes?",          "a": "Canada" },
+      { "q": "Which continent is the Sahara Desert located in?",  "a": "Africa" },
+      { "q": "What is the smallest country in the world?",        "a": "Vatican City" }
+    ],
+    "Science": [
+      { "q": "What is the chemical symbol for Gold?",             "a": "Au" },
+      { "q": "How many bones are in the adult human body?",       "a": "206" },
+      { "q": "What planet is known as the Red Planet?",           "a": "Mars" },
+      { "q": "What gas do plants absorb from the atmosphere?",    "a": "Carbon dioxide (CO2)" },
+      { "q": "What is the speed of light?",                       "a": "approximately 299,792 km/s" }
+    ],
+    "History": [
+      { "q": "In what year did World War II end?",                 "a": "1945" },
+      { "q": "Who was the first person to walk on the Moon?",      "a": "Neil Armstrong" },
+      { "q": "Which empire was ruled by Julius Caesar?",           "a": "The Roman Empire" },
+      { "q": "In what year did the Berlin Wall fall?",             "a": "1989" },
+      { "q": "Who painted the Mona Lisa?",                         "a": "Leonardo da Vinci" }
+    ],
+    "Programming": [
+      { "q": "What does HTML stand for?",                          "a": "HyperText Markup Language" },
+      { "q": "What is a null value in programming?",               "a": "The absence of a value or object reference" },
+      { "q": "What does CSS stand for?",                           "a": "Cascading Style Sheets" },
+      { "q": "What is a RESTful API?",                             "a": "An API following REST architectural constraints" },
+      { "q": "What does OOP stand for?",                           "a": "Object-Oriented Programming" }
+    ]
+  }
+}
